@@ -2,9 +2,9 @@ const mongoose = require('../middlewares/mongodb')
 const Schema = mongoose.Schema;
 
 const ACCOUNT_SCHEMA = new Schema({
-    userName: String,
     password: String,
-    email: String
+    email: String,
+    phoneNumber: String
 })
 
 const ACCOUNT_MODEL = mongoose.model('account',ACCOUNT_SCHEMA)
