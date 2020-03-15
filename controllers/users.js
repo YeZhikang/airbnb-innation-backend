@@ -21,12 +21,16 @@ const login = async (ctx,next) => {
     const phoneNumber = ctx.request.body.phoneNumber
     const res = await AccountDB.find({phoneNumber})
     const body = {code: 200}
-    console.log(res)
     if(res.length > 0){
         body.isRegistered = true
+        const {email,phoneNumber} = {email:res[0].email,...ctx.request.body}
+        console.log({email,phoneNumber})
+        body.TOKEN = Token.addToken({email,phoneNumber})
+
     }else{
         body.isRegistered = false
     }
+    console.log(body)
     ctx.body = body
 }
 
@@ -38,9 +42,23 @@ const register = async(ctx,next) => {
     }
 } 
 
+
+
+/**
+ * 
+ * @param {*} ctx 
+ * @param {*} next 
+ * 用户进入首页，通过分析 token 来返回用户信息。
+ */
+const getUserInfo = async(ctx,next) => {
+    const tokenInfo = Token.proveToken(ctx.request.header.authorization)
+    ctx.body = {...tokenInfo}
+}
+
 module.exports = {
     'GET /tokenCheck': tokenCheck,
     'GET /getLocationInfo': getLocationInfo,
     'POST /login': login,
-    'POST /register': register
+    'POST /register': register,
+    'GET /getUserInfo': getUserInfo
 }

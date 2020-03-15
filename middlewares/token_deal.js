@@ -5,7 +5,7 @@ const response = require('../response')
 let tokenParser =  (tokens) => {
     if (tokens) {
         // console.log(tokens)
-        let toke = tokens.split(' ')[1];
+        let toke = tokens;
         // 解析
         let decoded = jwt.decode(toke, serect);
         return decoded;
@@ -17,8 +17,8 @@ let tokenParser =  (tokens) => {
 module.exports = {
     addToken: (user) => {
         const TOKEN = jwt.sign({
-            userName: user.userName,
-            password: user.password
+            email: user.email,
+            phoneNumber: user.phoneNumber,
         }, serect, { expiresIn: '1h' });
         return TOKEN;
     },
@@ -28,7 +28,7 @@ module.exports = {
             if(PARSED_TOKEN && PARSED_TOKEN.exp <= new Date()/1000){
                 return response(4,{ data: "Token失效" })
             }else {
-                return response(1,{ data: "验证成功" })
+                return response(1,{ data: {...PARSED_TOKEN} })
             }
         }
         return response(4,{ data: "TOKEN无法验证" })
