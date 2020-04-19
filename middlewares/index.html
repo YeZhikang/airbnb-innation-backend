@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>原生JS实现元素拖拽</title>
+    <style>
+        *{
+            margin: 0;
+            height: 0;
+        }
+        #dragDiv{
+            top: 0;
+            left: 0;
+            width: 100px;
+            height: 100px;
+            cursor: move;    /*鼠标呈拖拽状*/  
+            position: absolute;    /*设置绝对定位，脱离文档流，便于拖拽时计算坐标*/  
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+    
+<div id="dragDiv"></div>
+    
+<script>
+
+    window.onload = function(){
+    
+        var oDiv = document.getElementById("dragDiv");    // 获取到要拖拽的元素
+        drag(oDiv);    // 调用自己封装的拖拽函数
+        
+        function drag(obj){
+            obj.onmousedown = function(e){
+            
+                var e = e || window.event;    // 兼容 IE
+                // 鼠标点击物体那一刻相对于物体左侧边框的距离=点击时的位置相对于浏览器
+                // 最左边的距离-物体左边框相对于浏览器最左边的距离，纵向同理
+                var divX = e.clientX - this.offsetLeft;
+                var divY = e.clientY - this.offsetTop;
+                
+                if(obj.setCapture){
+                    obj.setCapture();    // 修复低版本 IE bug
+                }
+                
+                document.onmousemove = function(e){
+                
+                    var e = e || window.event;
+                    
+                    var disX = e.clientX - divX;
+                    var disY = e.clientY - divY;
+                    
+                    // 控制拖拽物体的范围只能在浏览器视窗内，不允许出现滚动条或拖出可视区域
+                    if ( disX < 0 ) {
+                        disX = 0;
+                    } else if ( disX > document.documentElement.clientWidth - obj.offsetWidth ) {
+                        disX = document.documentElement.clientWidth - obj.offsetWidth;
+                    }
+                    
+                    if ( disY < 0 ) {
+                        disY = 0;
+                    } else if ( disY > document.documentElement.clientHeight - obj.offsetHeight ) {
+                        disY = document.documentElement.clientHeight - obj.offsetHeight;
+                    }
+                    
+                    // 移动时重新得到物体的距离，解决拖动时出现晃动现象  
+                    obj.style.top = disY + "px";
+                    obj.style.left = disX + "px";
+                    
+                    document.onmouseup = function(){    // 鼠标抬起时不再移动  
+                        // 预防鼠标弹起来后还会循环（即预防鼠标放上去的时候还会移动）
+                        document.onmousedown = document.onmousemove = null;
+                        if( obj.releaseCapture ){
+                            obj.releaseCapture();    // 修复低版本 IE bug
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+</script>
+
+</body>
+</html>
